@@ -57,6 +57,9 @@ public class FragmentAdapter extends FragmentPagerAdapter {
     }
 
     public void setKeyMessage(String tag, String msg) {
+        if(keyMessage == null) {
+            Log.d("Bluetooth", "Keymessage NULL");
+        }
         keyMessage.onFragmentMessage(tag,msg);
     }
 
@@ -74,10 +77,5 @@ public class FragmentAdapter extends FragmentPagerAdapter {
             default:
                 return null;
         }
-    }
-
-    public EditText getMsg_et(){
-        Log.d("Main", "Adapter " + (msg_et == null));
-        return msg_et;
     }
 }

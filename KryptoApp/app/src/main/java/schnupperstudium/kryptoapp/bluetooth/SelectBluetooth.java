@@ -22,6 +22,8 @@ import schnupperstudium.kryptoapp.R;
 
 public class SelectBluetooth extends AppCompatActivity {
 
+    private ArrayList<String> arrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,9 +31,34 @@ public class SelectBluetooth extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ListView bluetoothList = findViewById(R.id.bluetooth_list);
+
+
+        final ListView bluetoothList = findViewById(R.id.bluetooth_list);
+
+        arrayList = refreshList(bluetoothList);
+        bluetoothList.setClickable(true);
+        bluetoothList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent();
+                intent.putExtra("name", arrayList.get(position));
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        });
+
+        findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                arrayList = refreshList(bluetoothList);
+            }
+        });
+    }
+
+    private ArrayList<String> refreshList(ListView list){
         Bluetooth bluetooth = new Bluetooth(null,0); //TODO besserer Fix
-        ArrayList<String> arrayList = new ArrayList<>();
+        bluetooth.bluetoothEnable();
+        final ArrayList<String> arrayList = new ArrayList<>();
         final Set<BluetoothDevice> devices = bluetooth.getPairDevices();
         for(BluetoothDevice d : devices) {
             arrayList.add(d.getName());
@@ -42,27 +69,10 @@ public class SelectBluetooth extends AppCompatActivity {
         }
 
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.bluetooth_list_element, R.id.list_textview,arrayList);
-
-        bluetoothList.setAdapter(arrayAdapter);
-        bluetoothList.setClickable(true);
-        bluetoothList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent();
-                intent.putExtra("name", arrayAdapter.getItem(position));
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        list.setAdapter(arrayAdapter);
+        return arrayList;
     }
+
+
 
 }

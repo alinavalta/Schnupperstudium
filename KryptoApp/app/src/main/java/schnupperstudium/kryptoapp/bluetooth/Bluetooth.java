@@ -43,6 +43,12 @@ public class Bluetooth {
         return BluetoothAdapter.getDefaultAdapter();
     }
 
+    public void bluetoothEnable() {
+        if(!getBluetoothAdapter().isEnabled()){
+            getBluetoothAdapter().enable();
+        }
+    }
+
     public Set<BluetoothDevice> getPairDevices () {
         BluetoothAdapter adapter = getBluetoothAdapter();
         if(adapter == null) {
@@ -240,7 +246,7 @@ public class Bluetooth {
                     numBytes = mmInStream.read(mmBuffer);
                     Log.d("Bluetooth", "NUM_BYTES: " + numBytes);
                     // Send the obtained bytes to the UI activity.
-                    result += new String(mmBuffer, "UTF-8").substring(0, numBytes -1);//TODO -1?
+                    result += new String(mmBuffer, "UTF-8").substring(0, numBytes);//TODO -1?
                     Log.d("Bluetooth", "Recieved: " + result);
                 } catch (IOException e) {
                     Message msg = handler.obtainMessage(what);
