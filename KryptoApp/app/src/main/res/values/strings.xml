@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">KryptoApp</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_select_bluetooth">Bluetooth Geräte wählen</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="key">Schlüssel</string>
+    <string name="msg">Nachricht</string>
+    <string name="chiffer">Chiffrat</string>
+    <string name="btnGenerateKey">Schlüssel erzeugen</string>
+    <string name="etKeyHint">Schlüssel eingeben</string>
+    <string name="etMsgHint">Nachricht eingeben</string>
+
+    <string name="btnDecrypt">entschlüsseln</string>
+    <string name="btnEncrypt">verschlüsseln</string>
+
+    <string name="btnSentC">Chiffrat senden</string>
+
+    <string name="btnRcvC">Chiffrat empfangen</string>
+
+    <string name="btnSentK">Schlüssel senden</string>
+
+    <string name="btnRcvK">Schlüssel empfangen</string>
+</resources>
