@@ -1,5 +1,7 @@
 package schnupperstudium.kryptoapp.crypto;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +15,16 @@ public class SelectAlgorithm {
     private Map<String, Algorithm> algorithmMap;
     private  Algorithm getCurrent;
 
-    public SelectAlgorithm(){
+    public SelectAlgorithm(Context context){
         algorithmMap = new HashMap<>();
         Caesar caesar = new Caesar();
         algorithmMap.put(caesar.getName(), caesar);
+
+        CaesarLoesung caesarLoesung = new CaesarLoesung();
+        algorithmMap.put(caesarLoesung.getName(), caesarLoesung);
+
+        CaesarAngreifer caesarAngreifer = new CaesarAngreifer(context);
+        algorithmMap.put(caesarAngreifer.getName(), caesarAngreifer);
     }
 
     public Algorithm getAlgorithm() throws IllegalArgumentException {
