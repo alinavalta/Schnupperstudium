@@ -25,6 +25,13 @@
             android:id="@+id/btnEncrypt"
             android:text="@string/btnEncrypt"
             android:layout_gravity="bottom"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnProcessMsgCipher"
+            android:text="@string/btnProcess"
+            android:visibility="gone"
+            android:layout_gravity="bottom"/>
 
     </LinearLayout>
 

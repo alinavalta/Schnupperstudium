@@ -1,10 +1,8 @@
-package schnupperstudium.kryptoapp.crypto;
-
-import android.util.Log;
+package schnupperstudium.kryptoapp.crypto.algorithms;
 
 import java.util.Random;
 
-public class CaesarLoesung extends  Algorithm {
+public class CaesarLoesung extends Algorithm {
     @Override
     public String getName() {
         return "Cäsar Lösung";

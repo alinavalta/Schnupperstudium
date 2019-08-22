@@ -1,4 +1,6 @@
-package schnupperstudium.kryptoapp.crypto;
+package schnupperstudium.kryptoapp.crypto.algorithms;
+
+import schnupperstudium.kryptoapp.crypto.KeyFormatException;
 
 public abstract class Algorithm {
     public abstract String getName();

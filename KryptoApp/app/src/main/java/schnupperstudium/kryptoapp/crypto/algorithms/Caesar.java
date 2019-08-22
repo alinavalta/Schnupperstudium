@@ -1,4 +1,4 @@
-package schnupperstudium.kryptoapp.crypto;
+package schnupperstudium.kryptoapp.crypto.algorithms;
 
 public class Caesar extends Algorithm {
     @Override

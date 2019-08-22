@@ -22,4 +22,7 @@
     <string name="btnSentK">Schlüssel senden</string>
 
     <string name="btnRcvK">Schlüssel empfangen</string>
+    <string name="btnProcess">Nachricht/Ciffratpaar verarbeiten</string>
+    <string name="btnTryDecrypt">Entschlüsselung versuchen</string>
+
 </resources>

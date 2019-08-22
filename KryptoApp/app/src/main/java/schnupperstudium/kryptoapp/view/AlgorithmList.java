@@ -5,14 +5,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import java.util.ArrayList;
 
 import schnupperstudium.kryptoapp.MainActivity;
-import schnupperstudium.kryptoapp.R;
-import schnupperstudium.kryptoapp.crypto.Algorithm;
 
 public class AlgorithmList extends DialogFragment {
 

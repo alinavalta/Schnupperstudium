@@ -23,6 +23,15 @@
             android:text="@string/btnDecrypt"
             android:id="@+id/btnDecrypt"
             android:layout_gravity="bottom"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnTryDecrypt"
+            android:id="@+id/btnTryDecrypt"
+            android:visibility="gone"
+            android:layout_gravity="bottom"/>
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

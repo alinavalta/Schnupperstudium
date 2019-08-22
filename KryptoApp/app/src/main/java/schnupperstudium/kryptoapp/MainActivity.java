@@ -1,13 +1,10 @@
 package schnupperstudium.kryptoapp;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +17,6 @@ import schnupperstudium.kryptoapp.bluetooth.Bluetooth;
 import schnupperstudium.kryptoapp.bluetooth.SelectBluetooth;
 import schnupperstudium.kryptoapp.crypto.KeyFormatException;
 import schnupperstudium.kryptoapp.crypto.SelectAlgorithm;
-import schnupperstudium.kryptoapp.dictonary.Dictornary;
 import schnupperstudium.kryptoapp.view.AlgorithmList;
 import schnupperstudium.kryptoapp.view.Cipher;
 import schnupperstudium.kryptoapp.view.FragmentAdapter;
@@ -38,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
     public static final String ON_SENDKEY = "onSendKey";
     public static final String ON_SENDCIPHER = "onSendC";
     public static final String ON_RCVCIPHER = "onRcvC";
+    public static final String ON_TRY_DECRYPT = "onTry";
+    public static final String ON_PROCESS = "onProc";
 
     private String currentKey;
     private String currentCipher;
@@ -58,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
             public void onClick(View v) {
                 AlgorithmList dialogFragment = new AlgorithmList();
                 Bundle bundle = new Bundle();
-                bundle.putStringArrayList("List", selectAlgorithm.getAlgorithms());
+                bundle.putStringArrayList("List", selectAlgorithm.getNameList());
                 dialogFragment.setArguments(bundle);
                 dialogFragment.show(getSupportFragmentManager(), "AlgoListDialog");
             }
@@ -67,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
         pagerAdapter = new FragmentAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
+        viewPager.setCurrentItem(1);
         tabLayout = (TabLayout)findViewById(R.id.TabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -88,6 +87,13 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
     public void setAlgorithmListResult(String name) {
         selectAlgorithm.selectAlgorithm(name);
         toolbar.setTitle(name);
+        if(selectAlgorithm.isAlgorithm()){
+            pagerAdapter.setMessage(Msg.SET_ALGO,"");
+            pagerAdapter.setCipherMessage(Cipher.SET_ALGO, "");
+        } else {
+            pagerAdapter.setMessage(Msg.SET_ATTACK, "");
+            pagerAdapter.setCipherMessage(Cipher.SET_ATTACK, "");
+        }
     }
     public void onSentKey(String key) {
         /**final ProgressDialog processDialog = new ProgressDialog(MainActivity.this);
@@ -108,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         }).start();**/
 
 
-        if(key.length() == 0) {
+        if(key == null) {
             Toast.makeText(getApplicationContext(), "Schlüssel ist leer", Toast.LENGTH_LONG).show();
             return;
         }
@@ -174,17 +180,16 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 1) {//Send ciffer
-            Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
-            bluetooth.send(data.getStringExtra("name"), currentCipher);
-        } else if(requestCode == 2) {//Send key
-            if(resultCode == RESULT_OK) {
+        if(resultCode == RESULT_OK) {
+            if (requestCode == 1) {//Send ciffer
                 Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
-                Log.d("Bluetooth", "OnActivityResult: " + data.getStringExtra("name"));
+                bluetooth.send(data.getStringExtra("name"), currentCipher);
+            } else if (requestCode == 2) {//Send key
+                Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
                 bluetooth.send(data.getStringExtra("name"), currentKey);
-            } else if(resultCode == RESULT_CANCELED){
-                Toast.makeText(getApplicationContext(), "Kein Gerät ausgewählt",Toast.LENGTH_LONG).show();
             }
+        } else if(resultCode == RESULT_CANCELED){
+            Toast.makeText(getApplicationContext(), "Kein Gerät ausgewählt", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -192,20 +197,23 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
     public void onFragmentMessage(String tag, String data) {
         if(tag.equals(ON_ENCRPYT)){//onEncrypt
             onEncrypt(data);
-        } else if(tag.equals(ON_KEYCHANGED)){
+        } else if(tag.equals(ON_KEYCHANGED)) {
             currentKey = data;
-        } else if(tag.equals(ON_DECRYPT)){
-            onDecrpyt(data);
-        } else if(tag.equals(ON_GENKEY)) {
-            onGenerateKey();
         } else if(tag.equals(ON_SENDKEY)) {
             onSentKey(data);
         } else if(tag.equals(ON_RCVKEY)) {
             onRecieveKey();
-        } else if(tag.equals(ON_RCVCIPHER)) {
+        }else if(tag.equals(ON_DECRYPT)){
+            onDecrpyt(data);
+        } else if(tag.equals(ON_GENKEY)) {
+            onGenerateKey();
+        }  else if(tag.equals(ON_RCVCIPHER)) {
             onRecieveCipher();
         } else if(tag.equals(ON_SENDCIPHER)) {
             onSentCipher(data);
+        } else if(tag.equals(ON_PROCESS)) {
+
         }
     }
+
 }

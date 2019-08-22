@@ -16,14 +16,7 @@ import android.widget.EditText;
 import schnupperstudium.kryptoapp.MainActivity;
 import schnupperstudium.kryptoapp.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link key.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link key#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class key extends Fragment implements FragmentMessage{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,6 +27,8 @@ public class key extends Fragment implements FragmentMessage{
     //private String mParam1;
     //private String mParam2;
     public static final String SET_KEY = "setKey";
+    public static final String SET_DECRYPT = "setD";
+    public static final String SET_ENCRYPT= "setE";
 
     private FragmentMessage fragmentMessage;
     private EditText et;
@@ -95,8 +90,10 @@ public class key extends Fragment implements FragmentMessage{
 
     @Override
     public void onFragmentMessage(String tag, String data) {
-        if(tag.equals(SET_KEY)) {
+        if(tag.equals(SET_DECRYPT)) {
             et.setText(data);
+        } else if(tag.equals(SET_ENCRYPT)) {
+
         }
     }
 }

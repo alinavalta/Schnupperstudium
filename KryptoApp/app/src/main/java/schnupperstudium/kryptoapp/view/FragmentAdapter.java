@@ -5,20 +5,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
-import android.widget.EditText;
 
 import schnupperstudium.kryptoapp.R;
 
 public class FragmentAdapter extends FragmentPagerAdapter {
 
     private Context mContext;
-    private EditText msg_et;
-    private EditText key_et;
-    private EditText chiffer_et;
+    private key key;
+    private Msg msg;
+    private Cipher cipher;
     private FragmentMessage cipherMessage;
     private FragmentMessage keyMessage;
     private FragmentMessage message;
-
 
     public FragmentAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -28,18 +26,19 @@ public class FragmentAdapter extends FragmentPagerAdapter {
     // This determines the fragment for each tab
     @Override
     public Fragment getItem(int position) {
+        Log.d("Test", "GET Item");
         if (position == 0) {
-            key key = new key();
+            key = new key();
             keyMessage = (FragmentMessage) key;
             return key;
         } else if (position == 1){
-            Msg msg = new Msg();
+            msg = new Msg();
             message = (FragmentMessage) msg;
             return msg;
         } else{
-            Cipher chiffer = new Cipher();
-            cipherMessage = (FragmentMessage)chiffer;
-            return chiffer;
+            cipher = new Cipher();
+            cipherMessage = (FragmentMessage)cipher;
+            return cipher;
         }
     }
     // This determines the number of tabs
@@ -60,7 +59,7 @@ public class FragmentAdapter extends FragmentPagerAdapter {
         if(keyMessage == null) {
             Log.d("Bluetooth", "Keymessage NULL");
         }
-        keyMessage.onFragmentMessage(tag,msg);
+        keyMessage.onFragmentMessage(key.SET_KEY, msg);
     }
 
     // This determines the title for each tab

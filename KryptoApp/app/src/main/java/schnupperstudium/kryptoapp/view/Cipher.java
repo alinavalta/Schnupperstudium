@@ -12,20 +12,18 @@ import android.widget.EditText;
 import schnupperstudium.kryptoapp.MainActivity;
 import schnupperstudium.kryptoapp.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link Cipher.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link Cipher#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class Cipher extends Fragment implements FragmentMessage{
 
     public static final String SET_CIPHER = "setCiper";
 
+    public static final String SET_ATTACK = "attack";
+
+    public static final String SET_ALGO = "algo";
+
     private  EditText et;
     private Button btnDecrypt;
+    private Button btnTryDecrpyt;
     private FragmentMessage fragmentMessage;
     public Cipher() {
         // Required empty public constructor
@@ -53,6 +51,14 @@ public class Cipher extends Fragment implements FragmentMessage{
                 fragmentMessage.onFragmentMessage(MainActivity.ON_SENDCIPHER, et.getText().toString());
             }
         });
+
+        btnTryDecrpyt = rootView.findViewById(R.id.btnTryDecrypt);
+        btnTryDecrpyt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragmentMessage.onFragmentMessage(MainActivity.ON_TRY_DECRYPT, et.getText().toString());
+            }
+        });
         return rootView;
     }
 
@@ -62,14 +68,24 @@ public class Cipher extends Fragment implements FragmentMessage{
         fragmentMessage = (FragmentMessage) context;
     }
 
-    public EditText getEditText() {
-        return et;
+    private void setIsAlgorithm(boolean isAlgorithm) {
+        if(isAlgorithm) {
+            btnTryDecrpyt.setVisibility(View.GONE);
+            btnDecrypt.setVisibility(View.VISIBLE);
+        } else {
+            btnTryDecrpyt.setVisibility(View.VISIBLE);
+            btnDecrypt.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void onFragmentMessage(String tag, String data) {
         if(tag.equals(SET_CIPHER)) {
             et.setText(data);
+        } else if(tag.equals(SET_ATTACK)) {
+            setIsAlgorithm(false);
+        } else if(tag.equals(SET_ALGO)){
+            setIsAlgorithm(true);
         }
     }
 }
