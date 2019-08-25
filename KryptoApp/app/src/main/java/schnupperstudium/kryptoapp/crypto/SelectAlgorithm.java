@@ -7,11 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import schnupperstudium.kryptoapp.crypto.algorithms.Algorithm;
-import schnupperstudium.kryptoapp.crypto.algorithms.Caesar;
 import schnupperstudium.kryptoapp.crypto.attackers.Attacker;
-import schnupperstudium.kryptoapp.crypto.attackers.CaesarAngreifer;
-import schnupperstudium.kryptoapp.crypto.algorithms.CaesarLoesung;
-import schnupperstudium.kryptoapp.crypto.algorithms.RSA;
 
 public class SelectAlgorithm {
 
@@ -34,21 +30,9 @@ public class SelectAlgorithm {
         //AlgorithmusXY xy = new AlgorithmusXY();
         //algorithmMap.put(xy.getName(), xy);
 
-        CaesarLoesung caesarLoesung = new CaesarLoesung();
-        algorithmMap.put(caesarLoesung.getName(), caesarLoesung);
-
-        Caesar caesar = new Caesar();
-        algorithmMap.put(caesar.getName(), caesar);
-
-        RSA rsa = new RSA();
-        algorithmMap.put(rsa.getName(), rsa);
-
         //Hier für jeden Angreifer:
         //AngreiferXY xy = new AngreiferXY();
         //attackerMap.put(xy.getName(), xy);
-
-        CaesarAngreifer caesarAngreifer = new CaesarAngreifer(context);
-        attackerMap.put(caesarAngreifer.getName(), caesarAngreifer);
     }
 
     public Algorithm getAlgorithm() throws IllegalArgumentException {
