@@ -15,6 +15,8 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
 
+import schnupperstudium.kryptoapp.MainActivity;
+
 
 public class Bluetooth {
 
@@ -73,18 +75,8 @@ public class Bluetooth {
         if(device == null){
             return false;
         }
-        ConnectThread connectThread = new ConnectThread(device);
-        connectThread.run();
-        Log.d("Bluetooth", "ConnectThread Started");
-        ConnectedThread connectedThread = new ConnectedThread(connectThread.mmSocket);
-        //connectedThread.run();
-        try {
-            connectedThread.write(msg.getBytes());
-            connectedThread.cancel();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        ConnectThread connectThread = new ConnectThread(device,msg);
+        connectThread.start();
         return true;
     }
 
@@ -99,12 +91,15 @@ public class Bluetooth {
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
+        private String msg;
 
-        public ConnectThread(BluetoothDevice device) {
+        public ConnectThread(BluetoothDevice device, String msg) {
             // Use a temporary object that is later assigned to mmSocket
             // because mmSocket is final.
             BluetoothSocket tmp = null;
             mmDevice = device;
+            this.msg = msg;
+
 
             try {
                 // Get a BluetoothSocket to connect with the given BluetoothDevice.
@@ -126,6 +121,16 @@ public class Bluetooth {
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
                 mmSocket.connect();
+                ConnectedThread connectedThread = new ConnectedThread(mmSocket);
+                //connectedThread.run();
+                try {
+                    connectedThread.write(msg.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d("Bluetooth", "FALSE");
+                    handler.sendEmptyMessage(Bluetooth.SEND_FAILED_WHAT);
+                }
+
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
                 try {
@@ -252,25 +257,24 @@ public class Bluetooth {
             String result = "";
 
             // Keep listening to the InputStream until an exception occurs.
-            while (numBytes != -1) {
-                try {
-                    // Read from the InputStream.
-                    numBytes = mmInStream.read(mmBuffer);
-                    Log.d("Bluetooth", "NUM_BYTES: " + numBytes);
-                    // Send the obtained bytes to the UI activity.
+            try {
+                while ((numBytes = mmInStream.read(mmBuffer)) != -1) {
                     result += new String(mmBuffer, "UTF-8").substring(0, numBytes);//TODO -1?
                     Log.d("Bluetooth", "Recieved: " + result);
-                } catch (IOException e) {
-                    Log.d("Bluetooth", "Fehler:  "  + e.getMessage());
-                    Message msg = handler.obtainMessage(what);
-                    Bundle bundle = new Bundle();
-                    bundle.putString(READ_TAG, result);
-                    msg.setData(bundle);
-                    msg.sendToTarget();
-                    Log.d("Bluetooth", "Send to Target: " + result + " what " + what);
-                    break;
                 }
+            } catch (IOException e) {
+                Log.d("Bluetooth", "Fehler:  "  + e.getMessage());
             }
+            if(result == "") {
+                handler.sendEmptyMessage(Bluetooth.RCV_FAIL_WHAT);
+                return;
+            }
+            Message msg = handler.obtainMessage(what);
+            Bundle bundle = new Bundle();
+            bundle.putString(READ_TAG, result);
+            msg.setData(bundle);
+            msg.sendToTarget();
+            Log.d("Bluetooth", "Send to Target: " + result + " what " + what);
         }
 
         // Call this from the main activity to send data to the remote device.

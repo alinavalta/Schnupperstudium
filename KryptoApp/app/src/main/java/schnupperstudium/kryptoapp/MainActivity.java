@@ -241,13 +241,16 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         if(resultCode == RESULT_OK) {
             if (requestCode == 1) {//Send ciffer
                 Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
-                bluetooth.send(data.getStringExtra("name"), currentCipher);
+                if(!bluetooth.send(data.getStringExtra("name"), currentCipher)){
+                   Toast.makeText(getApplicationContext(), "Senden fehlgeschlagen", Toast.LENGTH_LONG).show();
+                }
             } else if (requestCode == 2) {//Send key
                 Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
                 try {
                     String sentKey = selectAlgorithm.getAlgorithmName().getSentKey(currentKey);
                     Log.d("Test", "Send Key: " + sentKey);
                     bluetooth.send(data.getStringExtra("name"), sentKey);
+                    Toast.makeText(getApplicationContext(), "Senden fehlgeschlagen", Toast.LENGTH_LONG).show();
                 } catch (KeyFormatException e) {
                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 } catch (IllegalArgumentException e) {
