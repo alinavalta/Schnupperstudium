@@ -27,8 +27,6 @@ public class key extends Fragment implements FragmentMessage{
     //private String mParam1;
     //private String mParam2;
     public static final String SET_KEY = "setKey";
-    public static final String SET_DECRYPT = "setD";
-    public static final String SET_ENCRYPT= "setE";
 
     private FragmentMessage fragmentMessage;
     private EditText et;
@@ -90,10 +88,8 @@ public class key extends Fragment implements FragmentMessage{
 
     @Override
     public void onFragmentMessage(String tag, String data) {
-        if(tag.equals(SET_DECRYPT)) {
+        if(tag.equals(SET_KEY)) {
             et.setText(data);
-        } else if(tag.equals(SET_ENCRYPT)) {
-
         }
     }
 }

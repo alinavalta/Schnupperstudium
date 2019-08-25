@@ -1,5 +1,7 @@
 package schnupperstudium.kryptoapp;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
     public static final String ON_RCVCIPHER = "onRcvC";
     public static final String ON_TRY_DECRYPT = "onTry";
     public static final String ON_PROCESS = "onProc";
+    private static final String ON_SAVE_ALGO = "saveAlgo";
+    private static final int WHAT_TRYDECRPYT = 10;
+    private static final int WHAT_TRYDECRYPT_FAILED = 11;
 
     private String currentKey;
     private String currentCipher;
@@ -62,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
             }
         });
         setSupportActionBar(toolbar);
-        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
         pagerAdapter = new FragmentAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setCurrentItem(1);
@@ -72,16 +77,47 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(Message msg) {
+                Log.d("Main", "Message rcv");
+                if(msg.what == WHAT_TRYDECRYPT_FAILED) {
+                    Toast.makeText(getApplicationContext(), "Entschlüsselung fehlgeschlagen", Toast.LENGTH_LONG).show();
+                    return;
+                } else if(msg.what == Bluetooth.CONNCTION_WHAT){
+                    Toast.makeText(getApplicationContext(), "verbunden", Toast.LENGTH_LONG).show();
+                }
                 Bundle bundle = msg.getData();
+                if(msg.what == WHAT_TRYDECRPYT) {
+                    viewPager.setCurrentItem(1);
+                    pagerAdapter.setKeyMessage(key.SET_KEY, bundle.getString(key.SET_KEY));
+                    pagerAdapter.setMessage(Msg.SET_MESSAGE, bundle.getString(Msg.SET_MESSAGE));
+                    return;
+                }
                 String string = bundle.getString(Bluetooth.READ_TAG);
                 if(msg.what == Bluetooth.KEY_RECIEVED_WHAT){
+                    Log.d("Bluetooth", "Handler Message: " + string);
                     pagerAdapter.setKeyMessage(key.SET_KEY, string);
                 } else if(msg.what == Bluetooth.CIPHER_RECIEVED_WHAT) {
                     pagerAdapter.setCipherMessage(Cipher.SET_CIPHER, string);
+                } else if(msg.what == Bluetooth.SEND_WHAT) {
+                    Toast.makeText(getApplicationContext(), "Senden erfolgreich", Toast.LENGTH_LONG).show();
+                } else if(msg.what == Bluetooth.SEND_FAILED_WHAT){
+                    Toast.makeText(getApplicationContext(), "Senden fehlgeschlagen", Toast.LENGTH_LONG).show();
+                } else if(msg.what == Bluetooth.RCV_FAIL_WHAT) {
+                    Toast.makeText(getApplicationContext(), "Es konnte keine Verbingung aufgebaut werden", Toast.LENGTH_LONG).show();
+                } else if(msg.what == Bluetooth.RCV_CONNECTED_WHAT) {
+                    Toast.makeText(getApplicationContext(), "Verbingung wird aufgebaut", Toast.LENGTH_LONG).show();
                 }
-                Log.d("Bluetooth", "Handler Message: " + string);
+
             }
         };
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        if(toolbar.getTitle().equals("Algorithmus wählen")) {
+            toolbar.callOnClick();
+        }
+
     }
 
     public void setAlgorithmListResult(String name) {
@@ -104,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         new Thread(new Runnable() {
             public void run() {
                 Dictornary dictornary = new Dictornary(getApplicationContext());
-                if(dictornary.isInDictornary(input)) {
+                if(dictornary.isInDictionary(input)) {
                     Toast.makeText(getApplicationContext(), "Vorhanden: " + input, Toast.LENGTH_LONG).show();
                 }else {
                     Toast.makeText(getApplicationContext(), "existiert nicht", Toast.LENGTH_LONG).show();
@@ -148,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
             pagerAdapter.setCipherMessage(Cipher.SET_CIPHER, c);
             tabLayout.getTabAt(2).select();
         } catch (IllegalArgumentException e) {
-            toolbar.callOnClick();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }  catch (KeyFormatException e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -164,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
             pagerAdapter.setMessage(Msg.SET_MESSAGE, m);
             tabLayout.getTabAt(1).select();
         } catch (IllegalArgumentException e) {
-            toolbar.callOnClick();
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         } catch (KeyFormatException e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -175,7 +209,31 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
             pagerAdapter.setKeyMessage(key.SET_KEY, selectAlgorithm.getAlgorithm().generateRandomKey());
         } catch (IllegalArgumentException e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            toolbar.callOnClick();
+        }
+    }
+
+    public void onTryDecrypt(String cipher) {
+        final ProgressDialog processDialog = new ProgressDialog(MainActivity.this);
+        final String input = cipher;
+        processDialog.setMessage("Verschlüsselung wird versucht");
+        processDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        processDialog.show();
+        final TryDecryptThread tryDecryptThread = new TryDecryptThread(handler, cipher, processDialog);
+        processDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                tryDecryptThread.interrupt();
+            }
+        });
+
+        tryDecryptThread.start();
+    }
+
+    public void onProcess(String msg) {
+        if(selectAlgorithm.getAttacker().process(msg, currentCipher)){
+            pagerAdapter.setKeyMessage(key.SET_KEY, selectAlgorithm.getAttacker().getKey());
+        } else {
+            Toast.makeText(getApplicationContext(), "Es konnte kein Schlüssel ermittelt werden", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -186,7 +244,15 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
                 bluetooth.send(data.getStringExtra("name"), currentCipher);
             } else if (requestCode == 2) {//Send key
                 Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
-                bluetooth.send(data.getStringExtra("name"), currentKey);
+                try {
+                    String sentKey = selectAlgorithm.getAlgorithmName().getSentKey(currentKey);
+                    Log.d("Test", "Send Key: " + sentKey);
+                    bluetooth.send(data.getStringExtra("name"), sentKey);
+                } catch (KeyFormatException e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                } catch (IllegalArgumentException e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         } else if(resultCode == RESULT_CANCELED){
             Toast.makeText(getApplicationContext(), "Kein Gerät ausgewählt", Toast.LENGTH_LONG).show();
@@ -212,8 +278,42 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         } else if(tag.equals(ON_SENDCIPHER)) {
             onSentCipher(data);
         } else if(tag.equals(ON_PROCESS)) {
-
+            onProcess(data);
+        } else if(tag.equals(ON_TRY_DECRYPT)) {
+            onTryDecrypt(data);
         }
+    }
+
+    private class TryDecryptThread extends Thread {
+
+        private Handler handler;
+        private  ProgressDialog dialog;
+        private String cipher;
+        public TryDecryptThread(Handler handler, String cipher, ProgressDialog progressDialog) {
+            this.handler= handler;
+            this.cipher = cipher;
+            dialog = progressDialog;
+        }
+
+        public void run() {
+            try {
+                if (selectAlgorithm.getAttacker().tryDecrypt(cipher)) {
+                    Message msg = handler.obtainMessage(MainActivity.WHAT_TRYDECRPYT);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(Msg.SET_MESSAGE, selectAlgorithm.getAttacker().getMessage());
+                    bundle.putString(key.SET_KEY, selectAlgorithm.getAttacker().getKey());
+                    msg.setData(bundle);
+                    msg.sendToTarget();
+                    dialog.dismiss();
+                } else {
+                    dialog.dismiss();
+                    handler.sendEmptyMessage(WHAT_TRYDECRYPT_FAILED);
+                }
+            } catch (InterruptedException e) {
+
+            }
+        }
+
     }
 
 }

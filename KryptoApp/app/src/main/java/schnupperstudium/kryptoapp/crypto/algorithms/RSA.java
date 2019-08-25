@@ -3,6 +3,7 @@ package schnupperstudium.kryptoapp.crypto.algorithms;
 import android.util.Log;
 
 import java.math.BigInteger;
+import java.security.Key;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +17,17 @@ public class RSA extends Algorithm {
     @Override
     public String getName() {
         return "RSA";
+    }
+
+    @Override
+    public String getSentKey(String key) throws KeyFormatException {
+        int result[] = keyFromString(key);
+        if(result.length == 2){
+            return key;
+        } else if (result.length == 4) {
+            return result[2] + ";" + result[3];
+        }
+        throw new KeyFormatException("Schlüssel Fromat stimmt nicht");
     }
 
     @Override
@@ -64,6 +76,7 @@ public class RSA extends Algorithm {
 
     public int[] keyFromString(String input) throws KeyFormatException{
         int result[] = new int[2];
+        Log.d("RSA", "INpUT " + input);
         String strPattern= "(\\d+);(\\d+)";
         String patternSkPk = "(\\d+);(\\d+);(\\d+);(\\d+)";
         Pattern pattern = Pattern.compile(strPattern);
@@ -77,17 +90,19 @@ public class RSA extends Algorithm {
             } catch (NumberFormatException e) {
                 throw new KeyFormatException("Schlüssel Fromat stimmt nicht: " + input + " Erwartet: " + strPattern);
             }
-        }
-        if(matcher2.matches()) {
+        }else if(matcher2.matches()) {
+            Log.d("RSA", "Matches2 ");
             try {
                 result = new int[4];
-                result[0] = Integer.parseInt(matcher.group(1));
-                result[1] = Integer.parseInt(matcher.group(2));
-                result[2] = Integer.parseInt(matcher.group(3));
-                result[3] = Integer.parseInt(matcher.group(4));
+                result[0] = Integer.parseInt(matcher2.group(1));
+                result[1] = Integer.parseInt(matcher2.group(2));
+                result[2] = Integer.parseInt(matcher2.group(3));
+                result[3] = Integer.parseInt(matcher2.group(4));
             } catch (NumberFormatException e) {
-                throw new KeyFormatException("Schlüssel Fromat stimmt nicht: " + input + " Erwartet: " + strPattern);
+                throw new KeyFormatException("Schlüssel Fromat stimmt nicht: " + input + " Erwartet: " + patternSkPk);
             }
+        } else {
+            throw new KeyFormatException("Schlüssel Fromat stimmt nicht: " + input + " Erwartet: " + strPattern);
         }
         return result;
 

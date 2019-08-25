@@ -57,7 +57,6 @@ public class SelectBluetooth extends AppCompatActivity {
 
     private ArrayList<String> refreshList(ListView list){
         Bluetooth bluetooth = new Bluetooth(null,0); //TODO besserer Fix
-        bluetooth.bluetoothEnable();
         final ArrayList<String> arrayList = new ArrayList<>();
         final Set<BluetoothDevice> devices = bluetooth.getPairDevices();
         for(BluetoothDevice d : devices) {

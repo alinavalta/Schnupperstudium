@@ -3,6 +3,7 @@ package schnupperstudium.kryptoapp.view;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ public class Cipher extends Fragment implements FragmentMessage{
     private Button btnDecrypt;
     private Button btnTryDecrpyt;
     private FragmentMessage fragmentMessage;
+    private boolean isAlgorithm = true;
     public Cipher() {
         // Required empty public constructor
     }
@@ -59,6 +61,7 @@ public class Cipher extends Fragment implements FragmentMessage{
                 fragmentMessage.onFragmentMessage(MainActivity.ON_TRY_DECRYPT, et.getText().toString());
             }
         });
+        setIsAlgorithm(isAlgorithm);
         return rootView;
     }
 
@@ -76,6 +79,7 @@ public class Cipher extends Fragment implements FragmentMessage{
             btnTryDecrpyt.setVisibility(View.VISIBLE);
             btnDecrypt.setVisibility(View.GONE);
         }
+        this.isAlgorithm = isAlgorithm;
     }
 
     @Override

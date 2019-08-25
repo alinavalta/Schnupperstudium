@@ -59,7 +59,7 @@ public class FragmentAdapter extends FragmentPagerAdapter {
         if(keyMessage == null) {
             Log.d("Bluetooth", "Keymessage NULL");
         }
-        keyMessage.onFragmentMessage(key.SET_KEY, msg);
+        keyMessage.onFragmentMessage(tag, msg);
     }
 
     // This determines the title for each tab

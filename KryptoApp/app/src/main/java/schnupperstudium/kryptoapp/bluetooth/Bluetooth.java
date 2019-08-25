@@ -4,22 +4,16 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
-
-import static android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE;
-import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
 
 public class Bluetooth {
@@ -27,9 +21,13 @@ public class Bluetooth {
     private Handler handler;
     public final static String READ_TAG = "read";
     public final static int KEY_RECIEVED_WHAT = 1;
-    public final static int RECIEVING_WHAT = 4;
+    public final static int RCV_FAIL_WHAT = 4;
     public final static int CIPHER_RECIEVED_WHAT = 2;
     public final static int SEND_WHAT = 3;
+    public final static int SEND_FAILED_WHAT = 5;
+    public final static int RCV_CONNECTED_WHAT = 6;
+    public final static int CONNCTION_WHAT = 7;
+
     private int what;
 
     //BluetoothConnectionService bluetoothConnectionService;
@@ -40,7 +38,11 @@ public class Bluetooth {
     }
 
     private BluetoothAdapter getBluetoothAdapter() {
-        return BluetoothAdapter.getDefaultAdapter();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if(!adapter.isEnabled()) {
+            adapter.enable();
+        }
+        return adapter;
     }
 
     public void bluetoothEnable() {
@@ -78,8 +80,10 @@ public class Bluetooth {
         //connectedThread.run();
         try {
             connectedThread.write(msg.getBytes());
+            connectedThread.cancel();
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
     }
@@ -160,8 +164,12 @@ public class Bluetooth {
                 // MY_UUID is the app's UUID string, also used by the client code.
                 BluetoothAdapter bluetoothAdapter = getBluetoothAdapter();
                 tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord("Schnupperstudium", new UUID(1,1));
+                Message msg = handler.obtainMessage(RCV_CONNECTED_WHAT);
+                msg.sendToTarget();
             } catch (IOException e) {
-                Log.e("BLUETOOTH ERROR", "Socket's listen() method failed", e);
+                Message msg = handler.obtainMessage(RCV_FAIL_WHAT);
+                msg.sendToTarget();
+                tmp = null;
             }
             Log.d("Bluetooth", "AcceptThread ");
             mmServerSocket = tmp;
@@ -172,7 +180,11 @@ public class Bluetooth {
             // Keep listening until exception occurs or a socket is returned.
             while (true) {
                 try {
-                    socket = mmServerSocket.accept();
+                    if(! (mmServerSocket == null)){
+                        socket = mmServerSocket.accept();
+                    } else {
+                        return;
+                    }
                     Log.d("Bluetooth", "Accepted: " + socket.getRemoteDevice().getName());
                 } catch (IOException e) {
                     Log.e("BLUETOOTH ERROR", "Socket's accept() method failed", e);
@@ -229,7 +241,7 @@ public class Bluetooth {
             } catch (IOException e) {
                 Log.e("Bluetooth Error", "Error occurred when creating output stream", e);
             }
-            Log.d("Bluetooth", "Streams established");
+            handler.sendEmptyMessage(CONNCTION_WHAT);
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
         }
@@ -249,12 +261,13 @@ public class Bluetooth {
                     result += new String(mmBuffer, "UTF-8").substring(0, numBytes);//TODO -1?
                     Log.d("Bluetooth", "Recieved: " + result);
                 } catch (IOException e) {
+                    Log.d("Bluetooth", "Fehler:  "  + e.getMessage());
                     Message msg = handler.obtainMessage(what);
                     Bundle bundle = new Bundle();
                     bundle.putString(READ_TAG, result);
                     msg.setData(bundle);
                     msg.sendToTarget();
-                    Log.d("Bluetooth", "Send to Target: " + result);
+                    Log.d("Bluetooth", "Send to Target: " + result + " what " + what);
                     break;
                 }
             }
@@ -265,13 +278,17 @@ public class Bluetooth {
             try {
                 mmOutStream.write(bytes);
                 Log.d("Bluetooth", "written");
+                Message msg = handler.obtainMessage(SEND_WHAT);
+                msg.sendToTarget();
                 cancel();
                 // Share the sent message with the UI activity.
                 /**Message writtenMsg = handler.obtainMessage(
                         MessageConstants    .MESSAGE_WRITE, -1, -1, mmBuffer);
                 writtenMsg.sendToTarget();**/
             } catch (IOException e) {
-                Log.e("Bluetooth Error", "Error occurred when sending data", e);
+                Message msg = handler.obtainMessage(SEND_FAILED_WHAT);
+                msg.sendToTarget();
+                cancel();
             }
             Log.d("Bluetooth", "Send: " + new String(bytes, "UTF-8"));
         }

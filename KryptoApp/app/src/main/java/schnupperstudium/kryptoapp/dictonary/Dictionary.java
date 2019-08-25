@@ -10,14 +10,14 @@ import java.io.InputStreamReader;
 
 import schnupperstudium.kryptoapp.R;
 
-public class Dictornary {
+public class Dictionary {
     private Context context;
 
-    public Dictornary(Context context) {
+    public Dictionary(Context context) {
         this.context = context;
     }
 
-    public boolean isInDictornary(String input) {
+    public boolean isInDictionary(String input) {
         InputStream inputStream = context.getResources().openRawResource(R.raw.german);
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -39,7 +39,7 @@ public class Dictornary {
         return false;
     }
 
-    public boolean isPraefix(String input){
+    public boolean isPrefix(String input){
         InputStream inputStream = context.getResources().openRawResource(R.raw.german);
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

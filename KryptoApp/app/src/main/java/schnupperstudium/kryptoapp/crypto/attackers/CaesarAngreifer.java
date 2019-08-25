@@ -4,16 +4,16 @@ import android.content.Context;
 import android.util.Log;
 
 import schnupperstudium.kryptoapp.crypto.algorithms.CaesarLoesung;
-import schnupperstudium.kryptoapp.dictonary.Dictornary;
+import schnupperstudium.kryptoapp.dictonary.Dictionary;
 
 public class CaesarAngreifer  extends Attacker {
 
-     private Dictornary dictornary;
+     private Dictionary dictionary;
      private String message;
      private String key;
 
     public CaesarAngreifer(Context context) {
-        dictornary = new Dictornary(context);
+        dictionary = new Dictionary(context);
     }
 
     @Override
@@ -22,21 +22,21 @@ public class CaesarAngreifer  extends Attacker {
     }
 
     @Override
-    public boolean tryDecrypt(String cipher) {
+    public boolean tryDecrypt(String cipher) throws InterruptedException{
         CaesarLoesung caesarLoesung = new CaesarLoesung();
         char guessedKey = 'a';
         String result = "";
-        while (guessedKey <= 'z') {
+        while (guessedKey <= 'z' && !Thread.interrupted()) {
             result = caesarLoesung.decrypt(cipher, guessedKey +"");
             if(checkSolution(result)) {
                 key = guessedKey + "";
                 message = result;
+                Log.d("Caesar", "Entschlüsselt");
                 return true;
             }
             guessedKey++;
             Log.d("Caesar", "KEY. " + guessedKey);
         }
-
 
         return false;
     }
@@ -65,13 +65,14 @@ public class CaesarAngreifer  extends Attacker {
         int endIndex;
         while((endIndex = input.indexOf(' ', startIndex +1)) != -1){
             Log.d("Caesar", "Testing: " + input.substring(startIndex +1, endIndex) + " Endindex: " + endIndex);
-            if(dictornary.isInDictornary(input.substring(startIndex + 1, endIndex))){
+            if(dictionary.isInDictionary(input.substring(startIndex + 1, endIndex))){
                 startIndex = endIndex;
                 continue;
             }
             return false;
         }
-        if(dictornary.isInDictornary(input.substring(startIndex +1))){
+        if(dictionary.isInDictionary(input.substring(startIndex +1))){
+            Log.d("Caesar", "Testing: " + input.substring(startIndex +1, endIndex) + " Endindex: " + endIndex);
             return true;
         }
         return false;

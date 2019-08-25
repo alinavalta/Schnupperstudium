@@ -22,20 +22,33 @@ public class SelectAlgorithm {
     private Map<String, Attacker> attackerMap;
     private  Algorithm getCurrent;
 
+    /**
+     * Initialisiert alle Algorithmen und fügt sie in die Liste ein
+     * @param context Referenz auf die MainActivity wird für Angreifer benötigt, die auf das Dictionary zurgeifen wollen
+     */
     public SelectAlgorithm(Context context){
-        algorithmMap = new HashMap<>();
-        attackerMap = new HashMap<>();
-        Caesar caesar = new Caesar();
-        algorithmMap.put(caesar.getName(), caesar);
+        algorithmMap = new HashMap<>(); //Hier werden alle Algorithmeninstanzen gespeichert
+        attackerMap = new HashMap<>(); //Hier werden alle Angreiferinstanzen gespeichert
+
+        //Hier für jeden Algorithmus:
+        //AlgorithmusXY xy = new AlgorithmusXY();
+        //algorithmMap.put(xy.getName(), xy);
 
         CaesarLoesung caesarLoesung = new CaesarLoesung();
         algorithmMap.put(caesarLoesung.getName(), caesarLoesung);
 
-        CaesarAngreifer caesarAngreifer = new CaesarAngreifer(context);
-        attackerMap.put(caesarAngreifer.getName(), caesarAngreifer);
+        Caesar caesar = new Caesar();
+        algorithmMap.put(caesar.getName(), caesar);
 
         RSA rsa = new RSA();
         algorithmMap.put(rsa.getName(), rsa);
+
+        //Hier für jeden Angreifer:
+        //AngreiferXY xy = new AngreiferXY();
+        //attackerMap.put(xy.getName(), xy);
+
+        CaesarAngreifer caesarAngreifer = new CaesarAngreifer(context);
+        attackerMap.put(caesarAngreifer.getName(), caesarAngreifer);
     }
 
     public Algorithm getAlgorithm() throws IllegalArgumentException {
@@ -50,6 +63,15 @@ public class SelectAlgorithm {
             throw  new IllegalArgumentException("Es wurde noch kein Angreifer ausgewählt");
         }
         return currentAttacker;
+    }
+
+    public AlgorithmName getAlgorithmName () throws IllegalArgumentException {
+        if(isAlgorithm() && current != null) {
+            return current;
+        } else if(!isAlgorithm() && currentAttacker != null) {
+            return currentAttacker;
+        }
+        throw new IllegalArgumentException("Es wurde noch kein Algorithmus/Angreifer gewählt");
     }
 
     public boolean isAlgorithm() {
