@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import schnupperstudium.kryptoapp.MainActivity;
@@ -70,7 +71,7 @@ public class Bluetooth {
         return  null;
     }
     public boolean send(String deviceName, String msg) {
-        Log.d("Bluetooth", "Send");
+        Log.d("Bluetooth", "Send ");
         BluetoothDevice device = getDeviceByName(deviceName);
         if(device == null){
             return false;
@@ -108,7 +109,7 @@ public class Bluetooth {
             } catch (IOException e) {
                 Log.e("BLUETOOTH ERROR", "Socket's create() method failed", e);
             }
-            Log.d("Bluetooth", "Socket Established");
+            Log.d("Bluetooth", "Socket Established: ");
             mmSocket = tmp;
         }
 
@@ -121,30 +122,34 @@ public class Bluetooth {
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
                 mmSocket.connect();
-                ConnectedThread connectedThread = new ConnectedThread(mmSocket);
-                //connectedThread.run();
-                try {
-                    connectedThread.write(msg.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.d("Bluetooth", "FALSE");
-                    handler.sendEmptyMessage(Bluetooth.SEND_FAILED_WHAT);
-                }
 
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
                 try {
                     mmSocket.close();
                     Log.d("Bluetooth", "SocketClosed by run", connectException);
+                    return;
                 } catch (IOException closeException) {
                     Log.e("BLUETOOTH ERROR", "Could not close the client socket", closeException);
                 }
                 return;
             }
-
+            manage(mmSocket);
             // The connection attempt succeeded. Perform work associated with
             // the connection in a separate thread.
             //manageMyConnectedSocket(mmSocket);
+        }
+
+        private void manage(BluetoothSocket socket) {
+            ConnectedThread connectedThread = new ConnectedThread(socket);
+            try {
+                connectedThread.write(msg.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d("Bluetooth", "FALSE");
+                handler.sendEmptyMessage(Bluetooth.SEND_FAILED_WHAT);
+            }
+            cancel();
         }
 
         // Closes the client socket and causes the thread to finish.
@@ -267,6 +272,7 @@ public class Bluetooth {
             }
             if(result == "") {
                 handler.sendEmptyMessage(Bluetooth.RCV_FAIL_WHAT);
+                cancel();
                 return;
             }
             Message msg = handler.obtainMessage(what);
@@ -275,6 +281,7 @@ public class Bluetooth {
             msg.setData(bundle);
             msg.sendToTarget();
             Log.d("Bluetooth", "Send to Target: " + result + " what " + what);
+            cancel();
         }
 
         // Call this from the main activity to send data to the remote device.
@@ -284,22 +291,20 @@ public class Bluetooth {
                 Log.d("Bluetooth", "written");
                 Message msg = handler.obtainMessage(SEND_WHAT);
                 msg.sendToTarget();
-                cancel();
-                // Share the sent message with the UI activity.
-                /**Message writtenMsg = handler.obtainMessage(
-                        MessageConstants    .MESSAGE_WRITE, -1, -1, mmBuffer);
-                writtenMsg.sendToTarget();**/
             } catch (IOException e) {
                 Message msg = handler.obtainMessage(SEND_FAILED_WHAT);
                 msg.sendToTarget();
-                cancel();
+                //cancel();
             }
+            cancel();
             Log.d("Bluetooth", "Send: " + new String(bytes, "UTF-8"));
         }
 
         // Call this method from the main activity to shut down the connection.
         public void cancel() {
             try {
+                mmInStream.close();
+                mmOutStream.close();
                 mmSocket.close();
                 Log.d("Bluetooth", "SocketClosed");
             } catch (IOException e) {
