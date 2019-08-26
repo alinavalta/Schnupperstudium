@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(Message msg) {
-                Log.d("Main", "Message rcv");
                 if(msg.what == WHAT_TRYDECRYPT_FAILED) {
                     Toast.makeText(getApplicationContext(), "Entschlüsselung fehlgeschlagen", Toast.LENGTH_LONG).show();
                     return;
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
                 }
                 String string = bundle.getString(Bluetooth.READ_TAG);
                 if(msg.what == Bluetooth.KEY_RECIEVED_WHAT){
-                    Log.d("Bluetooth", "Handler Message: " + string);
                     pagerAdapter.setKeyMessage(key.SET_KEY, string);
                 } else if(msg.what == Bluetooth.CIPHER_RECIEVED_WHAT) {
                     pagerAdapter.setCipherMessage(Cipher.SET_CIPHER, string);
@@ -249,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
                 Bluetooth bluetooth = new Bluetooth(handler, Bluetooth.SEND_WHAT);
                 try {
                     String sentKey = selectAlgorithm.getAlgorithmName().getSentKey(currentKey);
-                    Log.d("Test", "Send Key: " + sentKey);
                     bluetooth.send(data.getStringExtra("name"), sentKey);
                     Toast.makeText(getApplicationContext(), "Senden fehlgeschlagen", Toast.LENGTH_LONG).show();
                 } catch (KeyFormatException e) {

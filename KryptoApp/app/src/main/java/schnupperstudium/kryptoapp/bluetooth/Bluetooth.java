@@ -146,8 +146,6 @@ public class Bluetooth {
                 connectedThread.write(msg.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d("Bluetooth", "FALSE");
-                handler.sendEmptyMessage(Bluetooth.SEND_FAILED_WHAT);
             }
             cancel();
         }
@@ -156,7 +154,7 @@ public class Bluetooth {
         public void cancel() {
             try {
                 mmSocket.close();
-                Log.d("Bluetooth", "close Socket in ConnectThread");
+                Log.d("Bluetooth", "Bluetooth socket closed");
             } catch (IOException e) {
                 Log.e("BLUETOOTH ERROR", "Could not close the client socket", e);
             }
@@ -181,7 +179,6 @@ public class Bluetooth {
                 msg.sendToTarget();
                 tmp = null;
             }
-            Log.d("Bluetooth", "AcceptThread ");
             mmServerSocket = tmp;
         }
 
@@ -265,10 +262,9 @@ public class Bluetooth {
             try {
                 while ((numBytes = mmInStream.read(mmBuffer)) != -1) {
                     result += new String(mmBuffer, "UTF-8").substring(0, numBytes);//TODO -1?
-                    Log.d("Bluetooth", "Recieved: " + result);
                 }
             } catch (IOException e) {
-                Log.d("Bluetooth", "Fehler:  "  + e.getMessage());
+                e.printStackTrace();
             }
             if(result == "") {
                 handler.sendEmptyMessage(Bluetooth.RCV_FAIL_WHAT);
@@ -280,7 +276,6 @@ public class Bluetooth {
             bundle.putString(READ_TAG, result);
             msg.setData(bundle);
             msg.sendToTarget();
-            Log.d("Bluetooth", "Send to Target: " + result + " what " + what);
             cancel();
         }
 
@@ -288,7 +283,6 @@ public class Bluetooth {
         public void write(byte[] bytes) throws IOException {
             try {
                 mmOutStream.write(bytes);
-                Log.d("Bluetooth", "written");
                 Message msg = handler.obtainMessage(SEND_WHAT);
                 msg.sendToTarget();
             } catch (IOException e) {
@@ -306,7 +300,7 @@ public class Bluetooth {
                 mmInStream.close();
                 mmOutStream.close();
                 mmSocket.close();
-                Log.d("Bluetooth", "SocketClosed");
+                Log.d("Bluetooth", "Bluetooth Socket closed");
             } catch (IOException e) {
                 Log.e("Bluetooth Error", "Could not close the connect socket", e);
             }
