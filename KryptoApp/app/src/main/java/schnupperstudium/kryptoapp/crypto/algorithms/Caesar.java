@@ -81,14 +81,14 @@ public class Caesar extends Algorithm {
     }
 
     /**
-     * Gibt an um wie viel verschoben werden soll getNumberFromKey('a') ist 1 getNumberFromKey('z') ist 26
+     * Gibt an um wie viel verschoben werden soll getNumberFromKey('a') ist 0 getNumberFromKey('z') ist 25
      * @param key
      * @return
      * @throws KeyFormatException
      */
     private int getNumberFromKey(String key) throws KeyFormatException {
 
-        throw new KeyFormatException("Kein gültiger Schlüssel"); //Wenn korrekter Schlüssel an gegeben wurde
+        throw new KeyFormatException("Kein gültiger Schlüssel"); //Wenn kein korrekter Schlüssel an gegeben wurde
     }
 
 
