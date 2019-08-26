@@ -37,13 +37,14 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
     public static final String ON_SENDCIPHER = "onSendC";
     public static final String ON_RCVCIPHER = "onRcvC";
     public static final String ON_TRY_DECRYPT = "onTry";
+    public static final String ON_CIPHER_CHANGED = "CChangeed";
     public static final String ON_PROCESS = "onProc";
     private static final String ON_SAVE_ALGO = "saveAlgo";
     private static final int WHAT_TRYDECRPYT = 10;
     private static final int WHAT_TRYDECRYPT_FAILED = 11;
 
-    private String currentKey;
-    private String currentCipher;
+    private String currentKey = "";
+    private String currentCipher ="";
     private SelectAlgorithm selectAlgorithm;
     private Toolbar toolbar;
     TabLayout tabLayout;
@@ -284,6 +285,8 @@ public class MainActivity extends AppCompatActivity implements FragmentMessage {
             onProcess(data);
         } else if(tag.equals(ON_TRY_DECRYPT)) {
             onTryDecrypt(data);
+        } else if(tag.equals(ON_CIPHER_CHANGED)) {
+            currentCipher = data;
         }
     }
 
